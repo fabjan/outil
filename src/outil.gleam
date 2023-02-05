@@ -28,7 +28,7 @@ pub fn implement(cmd: Command(a), run: ArgvFunction(a)) -> Command(a) {
   Command(cmd.name, cmd.description, cmd.arguments, cmd.options, run)
 }
 
-/// Execute the command with the given argument vector.
+/// Execute the command with the given argument vector, without the program name.
 pub fn execute(cmd: Command(a), args: List(String)) -> Result(a, Error) {
   cmd.run(args)
 }

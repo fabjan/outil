@@ -8,6 +8,7 @@ A library for writing command line tools. Like so:
 ```gleam
 import gleam/erlang
 import gleam/io
+import gleam/list
 import outil.{command}
 import outil/arg
 import outil/opt
@@ -31,7 +32,9 @@ fn say_hello() {
 }
 
 fn main() {
-  outil.execute(say_hello(), erlang.start_arguments())
+  // Erlang is not required, this example just uses it for getting ARGV
+  let cmd_args = erlang.start_arguments() |> list.drop(1)
+  outil.execute(say_hello(), cmd_args)
 }
 ```
 

@@ -1,11 +1,10 @@
 import gleam/string
 import gleeunit
 import gleeunit/should
-import outil.{
-  Command, MalformedArgument, MissingArgument, bool_arg, bool_opt, command,
-  execute, float_arg, float_opt, implement, int_arg, int_opt, string_arg,
-  string_opt, usage,
-}
+import outil.{command, execute, implement, usage}
+import outil/core.{Command, MalformedArgument, MissingArgument}
+import outil/arg
+import outil/opt
 
 pub fn main() {
   gleeunit.main()
@@ -13,9 +12,9 @@ pub fn main() {
 
 fn hello_cmd() -> Command(String) {
   use cmd <- command("hello", "Say hello to someone")
-  use name, cmd <- string_arg(cmd, "name")
-  use enthusiasm, cmd <- int_opt(cmd, "enthusiasm", "How enthusiastic?", 1)
-  use loudly, cmd <- bool_opt(cmd, "loudly", "Use all caps.")
+  use name, cmd <- arg.string(cmd, "name")
+  use enthusiasm, cmd <- opt.int(cmd, "enthusiasm", "How enthusiastic?", 1)
+  use loudly, cmd <- opt.bool(cmd, "loudly", "Use all caps.")
 
   implement(
     cmd,
@@ -52,15 +51,15 @@ type FruitBasket {
 fn the_whole_fruit_basket_cmd() -> Command(FruitBasket) {
   use cmd <- command("basket", "Use all the things!")
 
-  use foo, cmd <- bool_arg(cmd, "foo")
-  use bar, cmd <- float_arg(cmd, "bar")
-  use baz, cmd <- int_arg(cmd, "baz")
-  use qux, cmd <- string_arg(cmd, "qux")
+  use foo, cmd <- arg.bool(cmd, "foo")
+  use bar, cmd <- arg.float(cmd, "bar")
+  use baz, cmd <- arg.int(cmd, "baz")
+  use qux, cmd <- arg.string(cmd, "qux")
 
-  use quux, cmd <- bool_opt(cmd, "quux", "include quux?")
-  use corge, cmd <- float_opt(cmd, "corge", "how much corge?", 1.0)
-  use grault, cmd <- int_opt(cmd, "grault", "how many grault?", 1)
-  use garply, cmd <- string_opt(cmd, "garply", "which garply?", "default")
+  use quux, cmd <- opt.bool(cmd, "quux", "include quux?")
+  use corge, cmd <- opt.float(cmd, "corge", "how much corge?", 1.0)
+  use grault, cmd <- opt.int(cmd, "grault", "how many grault?", 1)
+  use garply, cmd <- opt.string(cmd, "garply", "which garply?", "default")
 
   implement(
     cmd,

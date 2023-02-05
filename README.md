@@ -8,12 +8,14 @@ A library for writing command line tools. Like so:
 ```gleam
 import gleam/erlang
 import gleam/io
-import outil
+import outil.{command}
+import outil/arg
+import outil/opt
 
-fn say_hello() -> Command(Nil) {
-  use cmd <- outil.command("hello", "Say hello to someone")
-  use name, cmd <- outil.string_arg(cmd, "name")
-  use enthusiasm, cmd <- outil.int_opt(cmd, "enthusiasm", "How enthusiastic?", 1)
+fn say_hello() {
+  use cmd <- command("hello", "Say hello to someone")
+  use name, cmd <- arg.string(cmd, "name")
+  use enthusiasm, cmd <- opt.int(cmd, "enthusiasm", "How enthusiastic?", 1)
 
   outil.implement(
     cmd,

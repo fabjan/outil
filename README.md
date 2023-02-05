@@ -55,3 +55,8 @@ gleam add outil
 ```
 
 and its documentation can be found at <https://hexdocs.pm/outil>.
+
+## Roadmap
+
+* Automatic implementation of `--help/-h` option.
+* Automatic printing of usage on `outil` command errors?

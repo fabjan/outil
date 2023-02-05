@@ -1,0 +1,11 @@
+name = "outil"
+version = "0.1.0"
+description = "A Gleam project"
+licences = ["Apache-2.0"]
+repository = { type = "github", user = "fabjan", repo = "outil" }
+
+[dependencies]
+gleam_stdlib = "~> 0.26"
+
+[dev-dependencies]
+gleeunit = "~> 0.10"

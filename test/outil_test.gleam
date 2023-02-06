@@ -1,8 +1,8 @@
 import gleam/string
 import gleeunit
 import gleeunit/should
-import outil.{command, execute, implement, usage}
-import outil/core.{Command, MalformedArgument, MissingArgument}
+import outil.{CommandLineError, Help, Return, command}
+import outil/error.{MalformedArgument, MissingArgument}
 import outil/arg
 import outil/opt
 
@@ -10,29 +10,32 @@ pub fn main() {
   gleeunit.main()
 }
 
-fn hello_cmd() -> Command(String) {
-  use cmd <- command("hello", "Say hello to someone")
+const hello_usage = "hello -- Say hello to someone.
+
+Usage: hello <name>
+
+Options:
+  --enthusiasm  How enthusiastic? (int, default: 1)
+  --loudly  Use all caps. (bool, default: false)"
+
+fn hello_cmd(args: List(String)) -> Result(String, Return) {
+  use cmd <- command("hello", "Say hello to someone.", args)
   use name, cmd <- arg.string(cmd, "name")
   use enthusiasm, cmd <- opt.int(cmd, "enthusiasm", "How enthusiastic?", 1)
   use loudly, cmd <- opt.bool(cmd, "loudly", "Use all caps.")
 
-  implement(
-    cmd,
-    fn(args) {
-      try name = name(args)
-      try enthusiasm = enthusiasm(args)
-      try loudly = loudly(args)
+  try name = name(cmd)
+  try enthusiasm = enthusiasm(cmd)
+  try loudly = loudly(cmd)
 
-      let message = "Hello, " <> name <> string.repeat("!", enthusiasm)
+  let message = "Hello, " <> name <> string.repeat("!", enthusiasm)
 
-      let message = case loudly {
-        True -> string.uppercase(message)
-        False -> message
-      }
+  let message = case loudly {
+    True -> string.uppercase(message)
+    False -> message
+  }
 
-      Ok(message)
-    },
-  )
+  Ok(message)
 }
 
 type FruitBasket {
@@ -48,8 +51,8 @@ type FruitBasket {
   )
 }
 
-fn the_whole_fruit_basket_cmd() -> Command(FruitBasket) {
-  use cmd <- command("basket", "Use all the things!")
+fn the_whole_fruit_basket_cmd(args: List(String)) -> Result(FruitBasket, Return) {
+  use cmd <- command("basket", "Use all the things!", args)
 
   use foo, cmd <- arg.bool(cmd, "foo")
   use bar, cmd <- arg.float(cmd, "bar")
@@ -61,78 +64,80 @@ fn the_whole_fruit_basket_cmd() -> Command(FruitBasket) {
   use grault, cmd <- opt.int(cmd, "grault", "how many grault?", 1)
   use garply, cmd <- opt.string(cmd, "garply", "which garply?", "default")
 
-  implement(
-    cmd,
-    fn(args) {
-      try foo = foo(args)
-      try bar = bar(args)
-      try baz = baz(args)
-      try qux = qux(args)
+  try foo = foo(cmd)
+  try bar = bar(cmd)
+  try baz = baz(cmd)
+  try qux = qux(cmd)
 
-      try quux = quux(args)
-      try corge = corge(args)
-      try grault = grault(args)
-      try garply = garply(args)
+  try quux = quux(cmd)
+  try corge = corge(cmd)
+  try grault = grault(cmd)
+  try garply = garply(cmd)
 
-      Ok(FruitBasket(foo, bar, baz, qux, quux, corge, grault, garply))
-    },
-  )
+  Ok(FruitBasket(foo, bar, baz, qux, quux, corge, grault, garply))
 }
 
 pub fn command_usage_test() {
-  let command = hello_cmd()
+  let result = hello_cmd([])
 
-  usage(command)
-  |> should.equal(
-    "Say hello to someone
+  assert Error(CommandLineError(_, usage)) = result
 
-Usage: hello <name>
+  usage
+  |> should.equal(hello_usage)
+}
 
-Options:
-  --enthusiasm  How enthusiastic? (int, default: 1)
-  --loudly  Use all caps. (bool, default: false)
-",
-  )
+pub fn help_test() {
+  let argv = ["--help"]
+  let result = hello_cmd(argv)
+
+  assert Error(Help(usage)) = result
+
+  usage
+  |> should.equal(hello_usage)
 }
 
 pub fn execute_command_test() {
   let argv = ["world"]
-  let command = hello_cmd()
+  let result = hello_cmd(argv)
 
-  execute(command, argv)
+  result
   |> should.equal(Ok("Hello, world!"))
 }
 
 pub fn bool_opt_test() {
   let argv = ["world", "--loudly"]
-  let command = hello_cmd()
+  let result = hello_cmd(argv)
 
-  execute(command, argv)
+  result
   |> should.equal(Ok("HELLO, WORLD!"))
 }
 
 pub fn int_opt_test() {
   let argv = ["world", "--enthusiasm=3"]
-  let command = hello_cmd()
+  let result = hello_cmd(argv)
 
-  execute(command, argv)
+  result
   |> should.equal(Ok("Hello, world!!!"))
 }
 
 pub fn missing_argument_test() {
   let argv = []
-  let command = hello_cmd()
+  let result = hello_cmd(argv)
 
-  execute(command, argv)
-  |> should.equal(Error(MissingArgument("name")))
+  assert Error(CommandLineError(reason, _)) = result
+
+  reason
+  |> should.equal(MissingArgument("name"))
 }
 
 pub fn malformed_argument_test() {
   let argv = ["world", "--enthusiasm=three"]
-  let command = hello_cmd()
+  let result = hello_cmd(argv)
 
-  execute(command, argv)
-  |> should.equal(Error(MalformedArgument("enthusiasm", "three")))
+  assert Error(CommandLineError(reason, _)) = result
+
+  reason
+  |> should.equal(MalformedArgument("enthusiasm", "three"))
 }
 
 pub fn all_the_things_test() {
@@ -140,8 +145,8 @@ pub fn all_the_things_test() {
     "true", "1.0", "1", "hello", "--quux", "--corge=2.0", "--grault=2",
     "--garply=world",
   ]
-  let command = the_whole_fruit_basket_cmd()
+  let result = the_whole_fruit_basket_cmd(argv)
 
-  execute(command, argv)
+  result
   |> should.equal(Ok(FruitBasket(True, 1.0, 1, "hello", True, 2.0, 2, "world")))
 }

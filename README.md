@@ -72,3 +72,23 @@ gleam add outil
 ```
 
 and its documentation can be found at <https://hexdocs.pm/outil>.
+
+## Changelog
+
+### 0.3.0
+
+* Expanded the return type of commands to include a way for the command code itself to return errors.
+* **BREAKING** Some types were renamed to support the above, and be more clear.
+
+### 0.2.1
+
+* Fixed some docs.
+
+### 0.2.0
+
+* **BREAKING** Simplified command implementation. The function is the command now, it no longer returns a `Command` value.
+
+### 0.1.0
+
+* Hello world!
+* Something kind of working.

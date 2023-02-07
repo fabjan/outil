@@ -4,14 +4,14 @@ import gleam/list
 import gleam/option
 import gleam/string
 import outil.{
-  BoolOpt, Command, CommandLineError, FloatOpt, Help, IntOpt, Opt, OptValue,
-  Return, StringOpt,
+  BoolOpt, Command, CommandLineError, CommandReturn, FloatOpt, Help, IntOpt, Opt,
+  OptValue, StringOpt,
 }
 import outil/error.{Reason}
 
 /// Transform parse errors into a return value, this is where we
 /// check for the help flag.
-pub fn handle_error(reason: Reason, cmd: Command) -> Return {
+pub fn handle_error(reason: Reason, cmd: Command) -> CommandReturn(a) {
   // This solution (piggybacking on the error handling) is not ideal since it
   // means we can only show help for commands that try to parse any arguments
   // or options. But if your command doesn't take any arguments or options

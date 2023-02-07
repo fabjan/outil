@@ -3,30 +3,30 @@ import gleam/int
 import gleam/list
 import gleam/result
 import outil.{
-  Argument, BoolArgument, Command, FloatArgument, IntArgument, StringArgument,
-  WithArgument, parse_bool,
+  Argument, BoolArgument, Command, Configure, FloatArgument, IntArgument,
+  StringArgument, parse_bool,
 }
 import outil/error.{MalformedArgument,
   MissingArgument, OutOfPlaceOption, Reason}
 import outil/help.{handle_error}
 
 /// Add a positional bool argument to the command before continuing.
-pub fn bool(cmd: Command, name: String, continue: WithArgument(Bool, a)) -> a {
+pub fn bool(cmd: Command, name: String, continue: Configure(Bool, a, _)) -> a {
   with_positional_argument(cmd, BoolArgument(name), parse_bool, continue)
 }
 
 /// Add a positional float argument to the command before continuing.
-pub fn float(cmd: Command, name: String, continue: WithArgument(Float, a)) -> a {
+pub fn float(cmd: Command, name: String, continue: Configure(Float, a, _)) -> a {
   with_positional_argument(cmd, FloatArgument(name), float.parse, continue)
 }
 
 /// Add a positional int argument to the command before continuing.
-pub fn int(cmd: Command, name: String, continue: WithArgument(Int, a)) -> a {
+pub fn int(cmd: Command, name: String, continue: Configure(Int, a, _)) -> a {
   with_positional_argument(cmd, IntArgument(name), int.parse, continue)
 }
 
 /// Add a positional string argument to the command before continuing.
-pub fn string(cmd: Command, name: String, cont: WithArgument(String, a)) -> a {
+pub fn string(cmd: Command, name: String, cont: Configure(String, a, _)) -> a {
   with_positional_argument(cmd, StringArgument(name), Ok, cont)
 }
 
@@ -38,7 +38,7 @@ fn with_positional_argument(
   cmd: Command,
   argument: Argument,
   parse: fn(String) -> Result(b, Nil),
-  continue: WithArgument(b, a),
+  continue: Configure(b, a, _),
 ) -> a {
   let arg_pos = list.length(cmd.arguments)
   let arg_parser = positional_arg_parser(arg_pos, argument.name, parse)

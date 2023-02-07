@@ -1,7 +1,7 @@
 import gleam/string
 import gleeunit
 import gleeunit/should
-import outil.{CommandLineError, Help, Return, command}
+import outil.{CommandError, CommandLineError, CommandResult, Help, command}
 import outil/error.{MalformedArgument, MissingArgument}
 import outil/arg
 import outil/opt
@@ -18,7 +18,7 @@ Options:
   --enthusiasm  How enthusiastic? (int, default: 1)
   --loudly  Use all caps. (bool, default: false)"
 
-fn hello_cmd(args: List(String)) -> Result(String, Return) {
+fn hello_cmd(args: List(String)) -> CommandResult(String, Nil) {
   use cmd <- command("hello", "Say hello to someone.", args)
   use name, cmd <- arg.string(cmd, "name")
   use enthusiasm, cmd <- opt.int(cmd, "enthusiasm", "How enthusiastic?", 1)
@@ -51,7 +51,9 @@ type FruitBasket {
   )
 }
 
-fn the_whole_fruit_basket_cmd(args: List(String)) -> Result(FruitBasket, Return) {
+fn the_whole_fruit_basket_cmd(
+  args: List(String),
+) -> CommandResult(FruitBasket, String) {
   use cmd <- command("basket", "Use all the things!", args)
 
   use foo, cmd <- arg.bool(cmd, "foo")
@@ -75,6 +77,21 @@ fn the_whole_fruit_basket_cmd(args: List(String)) -> Result(FruitBasket, Return)
   try garply = garply(cmd)
 
   Ok(FruitBasket(foo, bar, baz, qux, quux, corge, grault, garply))
+}
+
+fn twoface_cmd(args: List(String)) -> CommandResult(String, String) {
+  use cmd <- command("twoface", "Flip a coin.", args)
+  use heads, cmd <- opt.bool(cmd, "heads", "Heads?")
+  use tails, cmd <- opt.bool(cmd, "tails", "Tails?")
+
+  try heads = heads(cmd)
+  try tails = tails(cmd)
+
+  case #(heads, tails) {
+    #(True, False) -> Ok("Heads!")
+    #(False, True) -> Ok("Tails!")
+    _ -> Error(CommandError("You must choose heads or tails."))
+  }
 }
 
 pub fn command_usage_test() {
@@ -149,4 +166,18 @@ pub fn all_the_things_test() {
 
   result
   |> should.equal(Ok(FruitBasket(True, 1.0, 1, "hello", True, 2.0, 2, "world")))
+}
+
+pub fn command_error_test() {
+  twoface_cmd(["--heads"])
+  |> should.equal(Ok("Heads!"))
+
+  twoface_cmd(["--tails"])
+  |> should.equal(Ok("Tails!"))
+
+  twoface_cmd([])
+  |> should.equal(Error(CommandError("You must choose heads or tails.")))
+
+  twoface_cmd(["--heads", "--tails"])
+  |> should.equal(Error(CommandError("You must choose heads or tails.")))
 }

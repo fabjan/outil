@@ -47,18 +47,22 @@ pub type OptValue {
 }
 
 /// Non-normal return values from executing a command.
-pub type Return {
+pub type CommandReturn(a) {
+  /// An error in parsing the command line.
   CommandLineError(reason: Reason, usage: String)
+  /// An error in executing the command, `a` is your error value.
+  CommandError(a)
+  /// The user asked for help.
   Help(usage: String)
 }
 
-/// A function from the argument vector (in the given command) to a result.
-pub type ArgvFunction(a) =
-  fn(Command) -> Result(a, Return)
+/// The result of executing a command.
+pub type CommandResult(a, b) =
+  Result(a, CommandReturn(b))
 
 /// The type of continuation functions in building a command.
-pub type WithArgument(a, b) =
-  fn(ArgvFunction(a), Command) -> b
+pub type Configure(a, b, c) =
+  fn(fn(Command) -> CommandResult(a, c), Command) -> b
 
 /// Parse a Bool from a string.
 pub fn parse_bool(arg: String) -> Result(Bool, Nil) {

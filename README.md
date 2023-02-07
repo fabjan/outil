@@ -9,11 +9,13 @@ A library for writing command line tools. Like so:
 import gleam/erlang
 import gleam/io
 import gleam/list
+import gleam/result
+import gleam/string
 import outil.{command}
 import outil/arg
 import outil/opt
 
-fn say_hello(args: List(String)) {
+fn say_hello(args) {
   use cmd <- command("hello", "Say hello to someone", args)
   use name, cmd <- arg.string(cmd, "name")
   use enthusiasm, cmd <- opt.int(cmd, "enthusiasm", "How enthusiastic?", 1)
@@ -26,12 +28,22 @@ fn say_hello(args: List(String)) {
   Ok(io.println(message))
 }
 
-fn main() {
+pub fn main() {
   // Erlang is not required, this example just uses it for getting ARGV
-  let args = erlang.start_arguments()
-  |> list.drop(1) // drop the program name from the arguments we pass in
+  let args =
+    erlang.start_arguments()
+    |> list.drop(1)
 
+  // drop the program name from the arguments we pass in
   say_hello(args)
+  |> result.map_error(print_usage)
+}
+
+fn print_usage(ret) {
+  case ret {
+    outil.CommandLineError(_, usage) -> io.println(usage)
+    outil.Help(usage) -> io.println(usage)
+  }
 }
 ```
 

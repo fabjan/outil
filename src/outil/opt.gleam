@@ -5,7 +5,7 @@ import gleam/option.{None, Option, Some}
 import gleam/result
 import gleam/string
 import outil.{
-  BoolOpt, Command, FloatOpt, IntOpt, Opt, StringOpt, WithArgument, parse_bool,
+  BoolOpt, Command, Configure, FloatOpt, IntOpt, Opt, StringOpt, parse_bool,
 }
 import outil/error.{MalformedArgument, MissingArgument, Reason}
 import outil/help.{handle_error}
@@ -15,7 +15,7 @@ pub fn bool(
   cmd: Command,
   long: String,
   description: String,
-  continue: WithArgument(Bool, a),
+  continue: Configure(Bool, a, _),
 ) -> a {
   bool_(cmd, long, None, description, continue)
 }
@@ -26,7 +26,7 @@ pub fn bool_(
   long: String,
   short: Option(String),
   description: String,
-  continue: WithArgument(Bool, a),
+  continue: Configure(Bool, a, _),
 ) -> a {
   let opt = Opt(long, short, description, BoolOpt)
   let opt_parser = fn(run_cmd: Command) {
@@ -43,7 +43,7 @@ pub fn float(
   long: String,
   description: String,
   default: Float,
-  continue: WithArgument(Float, a),
+  continue: Configure(Float, a, _),
 ) -> a {
   float_(cmd, long, None, description, default, continue)
 }
@@ -55,7 +55,7 @@ pub fn float_(
   short: Option(String),
   description: String,
   default: Float,
-  continue: WithArgument(Float, a),
+  continue: Configure(Float, a, _),
 ) -> a {
   let opt = Opt(long, short, description, FloatOpt(default))
 
@@ -68,7 +68,7 @@ pub fn int(
   long: String,
   description: String,
   default: Int,
-  continue: WithArgument(Int, a),
+  continue: Configure(Int, a, _),
 ) -> a {
   int_(cmd, long, None, description, default, continue)
 }
@@ -80,7 +80,7 @@ pub fn int_(
   short: Option(String),
   description: String,
   default: Int,
-  continue: WithArgument(Int, a),
+  continue: Configure(Int, a, _),
 ) -> a {
   let opt = Opt(long, short, description, IntOpt(default))
 
@@ -93,7 +93,7 @@ pub fn string(
   long: String,
   description: String,
   default: String,
-  continue: WithArgument(String, a),
+  continue: Configure(String, a, _),
 ) -> a {
   string_(cmd, long, None, description, default, continue)
 }
@@ -105,7 +105,7 @@ pub fn string_(
   short: Option(String),
   description: String,
   default: String,
-  continue: WithArgument(String, a),
+  continue: Configure(String, a, _),
 ) -> a {
   let opt = Opt(long, short, description, StringOpt(default))
 
@@ -121,7 +121,7 @@ pub fn with_named_option(
   opt: Opt,
   default: b,
   parse: fn(String) -> Result(b, Nil),
-  continue: WithArgument(b, a),
+  continue: Configure(b, a, _),
 ) -> a {
   let opt_parser = named_opt_parser(opt.long, opt.short, parse, default)
   let opt_parser = fn(run_cmd: Command) {

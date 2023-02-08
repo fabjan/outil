@@ -1,3 +1,4 @@
+import gleam/io
 import gleam/option.{Option}
 import outil/error.{Reason}
 
@@ -12,6 +13,35 @@ pub fn command(
   continue: fn(Command) -> a,
 ) -> a {
   continue(Command(name, description, [], [], argv))
+}
+
+/// Convenience function for handling the result of executing a command.
+///
+/// Print usage if there was a command line error or if the user asked for it.
+///
+/// Does nothing if the command returned an application error, assuming that
+/// the application will handle it.
+pub fn print_usage(return) {
+  case return {
+    CommandLineError(_, usage) -> io.println(usage)
+    Help(usage) -> io.println(usage)
+    _ -> Nil
+  }
+}
+
+/// Convenience function for handling the result of executing a command.
+///
+/// Print usage if there was a command line error or if the user asked for it.
+///
+/// Exit with 2 if there was a command line error, 1 if there was a command
+/// error, or 0 if the command was successful.
+pub fn print_usage_and_exit(return) {
+  print_usage(return)
+  case return {
+    CommandLineError(_, _) -> halt_program(2)
+    CommandError(_) -> halt_program(1)
+    Help(_) -> halt_program(0)
+  }
 }
 
 /// A command line interface to a run function.
@@ -71,4 +101,14 @@ pub fn parse_bool(arg: String) -> Result(Bool, Nil) {
     "false" -> Ok(False)
     _ -> Error(Nil)
   }
+}
+
+if erlang {
+  external fn halt_program(Int) -> Nil =
+    "erlang" "halt"
+}
+
+if javascript {
+  external fn halt_program(Int) -> Nil =
+    "./outil_ffi.mjs" "exit"
 }

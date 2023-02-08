@@ -11,7 +11,7 @@ import gleam/io
 import gleam/list
 import gleam/result
 import gleam/string
-import outil.{command}
+import outil.{command, print_usage_and_exit}
 import outil/arg
 import outil/opt
 
@@ -29,21 +29,14 @@ fn say_hello(args) {
 }
 
 pub fn main() {
-  // Erlang is not required, this example just uses it for getting ARGV
   let args =
+    // Erlang is not required, this example just uses it for getting ARGV
     erlang.start_arguments()
+    // drop the program name from the arguments we pass in
     |> list.drop(1)
 
-  // drop the program name from the arguments we pass in
   say_hello(args)
-  |> result.map_error(print_usage)
-}
-
-fn print_usage(ret) {
-  case ret {
-    outil.CommandLineError(_, usage) -> io.println(usage)
-    outil.Help(usage) -> io.println(usage)
-  }
+  |> result.map_error(print_usage_and_exit)
 }
 ```
 
@@ -74,6 +67,10 @@ gleam add outil
 and its documentation can be found at <https://hexdocs.pm/outil>.
 
 ## Changelog
+
+### 0.3.1
+
+* Added convenience helpers print_usage and print_usage_and_exit for handling command errors.
 
 ### 0.3.0
 

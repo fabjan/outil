@@ -8,7 +8,7 @@ import outil.{
 }
 import outil/error.{MalformedArgument,
   MissingArgument, OutOfPlaceOption, Reason}
-import outil/help.{handle_error}
+import outil/help
 
 /// Add a positional bool argument to the command before continuing.
 pub fn bool(cmd: Command, name: String, continue: Configure(Bool, a, _)) -> a {
@@ -42,10 +42,7 @@ fn with_positional_argument(
 ) -> a {
   let arg_pos = list.length(cmd.arguments)
   let arg_parser = positional_arg_parser(arg_pos, argument.name, parse)
-  let arg_parser = fn(run_cmd: Command) {
-    arg_parser(run_cmd.argv)
-    |> result.map_error(fn(reason) { handle_error(reason, run_cmd) })
-  }
+  let arg_parser = fn(run_cmd: Command) { help.wrap_usage(run_cmd, arg_parser) }
 
   continue(arg_parser, append_argument(cmd, argument))
 }

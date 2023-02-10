@@ -2,24 +2,32 @@ import gleam/float
 import gleam/int
 import gleam/list
 import gleam/option
+import gleam/result
 import gleam/string
 import outil.{
-  BoolOpt, Command, CommandLineError, CommandReturn, FloatOpt, Help, IntOpt, Opt,
+  BoolOpt, Command, CommandLineError, CommandResult, FloatOpt, Help, IntOpt, Opt,
   OptValue, StringOpt,
 }
 import outil/error.{Reason}
 
-/// Transform parse errors into a return value, this is where we
-/// check for the help flag.
-pub fn handle_error(reason: Reason, cmd: Command) -> CommandReturn(a) {
-  // This solution (piggybacking on the error handling) is not ideal since it
-  // means we can only show help for commands that try to parse any arguments
-  // or options. But if your command doesn't take any arguments or options
-  // then you probably don't need this library at all.
-  case list.contains(cmd.argv, "--help") || list.contains(cmd.argv, "-h") {
-    True -> Help(usage(cmd))
-    False -> CommandLineError(reason, usage(cmd))
+/// A function using the command line arguments which can return command error reasons.
+pub type UseArgs(a) =
+  fn(List(String)) -> Result(a, Reason)
+
+/// Given a command, if the command line arguments contain `--help` or `-h`
+/// then return a help "error" with the usage string.
+/// Otherwise, pass the arguments to the given function and if it returns an
+/// error, wrap it in a `CommandLineError` with the usage string.
+pub fn wrap_usage(cmd: Command, continue: UseArgs(a)) -> CommandResult(a, _) {
+  let argv_contains = fn(s) { list.contains(cmd.argv, s) }
+
+  try args = case argv_contains("--help") || argv_contains("-h") {
+    True -> Error(Help(usage(cmd)))
+    False -> Ok(cmd.argv)
   }
+
+  continue(args)
+  |> result.map_error(CommandLineError(_, usage(cmd)))
 }
 
 fn usage(cmd: Command) -> String {

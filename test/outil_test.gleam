@@ -1,3 +1,4 @@
+import gleam/option.{Some}
 import gleam/string
 import gleeunit
 import gleeunit/should
@@ -65,6 +66,10 @@ fn the_whole_fruit_basket_cmd(
   use corge, cmd <- opt.float(cmd, "corge", "how much corge?", 1.0)
   use grault, cmd <- opt.int(cmd, "grault", "how many grault?", 1)
   use garply, cmd <- opt.string(cmd, "garply", "which garply?", "default")
+  use waldo, cmd <- opt.bool_(cmd, "waldo", Some("w"), "invert quux?")
+  use fred, cmd <- opt.float_(cmd, "fred", Some("f"), "multiply corge", 10.0)
+  use plugh, cmd <- opt.int_(cmd, "plugh", Some("p"), "add to grault", 1)
+  use xyzzy, cmd <- opt.string_(cmd, "xyzzy", Some("x"), "garply suffix", "!")
 
   try foo = foo(cmd)
   try bar = bar(cmd)
@@ -76,7 +81,21 @@ fn the_whole_fruit_basket_cmd(
   try grault = grault(cmd)
   try garply = garply(cmd)
 
-  Ok(FruitBasket(foo, bar, baz, qux, quux, corge, grault, garply))
+  try waldo = waldo(cmd)
+  try fred = fred(cmd)
+  try plugh = plugh(cmd)
+  try xyzzy = xyzzy(cmd)
+
+  Ok(FruitBasket(
+    foo,
+    bar,
+    baz,
+    qux,
+    quux && !waldo,
+    corge *. fred,
+    grault + plugh,
+    garply <> xyzzy,
+  ))
 }
 
 fn twoface_cmd(args: List(String)) -> CommandResult(String, String) {
@@ -92,6 +111,29 @@ fn twoface_cmd(args: List(String)) -> CommandResult(String, String) {
     #(False, True) -> Ok("Tails!")
     _ -> Error(CommandError("You must choose heads or tails."))
   }
+}
+
+const help_usage = "help -- Test help text.
+
+Usage: help
+
+Options:
+  --foo  bar (string, default: \"baz\")"
+
+fn help_cmd(args: List(String)) -> CommandResult(String, Nil) {
+  use cmd <- command("help", "Test help text.", args)
+  use foo, cmd <- opt.string(cmd, "foo", "bar", "baz")
+
+  foo(cmd)
+}
+
+pub fn help_usage_test() {
+  assert Ok("baz") = help_cmd([])
+
+  assert Error(Help(usage)) = help_cmd(["--help"])
+
+  usage
+  |> should.equal(help_usage)
 }
 
 pub fn command_usage_test() {
@@ -160,12 +202,12 @@ pub fn malformed_argument_test() {
 pub fn all_the_things_test() {
   let argv = [
     "true", "1.0", "1", "hello", "--quux", "--corge=2.0", "--grault=2",
-    "--garply=world",
+    "--garply=world", "-w", "-f=2.0", "-p=3", "-x=!",
   ]
   let result = the_whole_fruit_basket_cmd(argv)
 
   result
-  |> should.equal(Ok(FruitBasket(True, 1.0, 1, "hello", True, 2.0, 2, "world")))
+  |> should.equal(Ok(FruitBasket(True, 1.0, 1, "hello", False, 4.0, 5, "world!")))
 }
 
 pub fn command_error_test() {

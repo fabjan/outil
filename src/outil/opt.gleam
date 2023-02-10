@@ -8,7 +8,7 @@ import outil.{
   BoolOpt, Command, Configure, FloatOpt, IntOpt, Opt, StringOpt, parse_bool,
 }
 import outil/error.{MalformedArgument, MissingArgument, Reason}
-import outil/help.{handle_error}
+import outil/help
 
 /// Add a named bool option to the command before continuing.
 pub fn bool(
@@ -29,10 +29,8 @@ pub fn bool_(
   continue: Configure(Bool, a, _),
 ) -> a {
   let opt = Opt(long, short, description, BoolOpt)
-  let opt_parser = fn(run_cmd: Command) {
-    bool_opt_parser(long, short)(run_cmd.argv)
-    |> result.map_error(fn(reason) { handle_error(reason, run_cmd) })
-  }
+  let opt_parser = bool_opt_parser(long, short)
+  let opt_parser = fn(run_cmd: Command) { help.wrap_usage(run_cmd, opt_parser) }
 
   continue(opt_parser, add_option(cmd, opt))
 }
@@ -124,10 +122,7 @@ pub fn with_named_option(
   continue: Configure(b, a, _),
 ) -> a {
   let opt_parser = named_opt_parser(opt.long, opt.short, parse, default)
-  let opt_parser = fn(run_cmd: Command) {
-    opt_parser(run_cmd.argv)
-    |> result.map_error(fn(reason) { handle_error(reason, run_cmd) })
-  }
+  let opt_parser = fn(run_cmd: Command) { help.wrap_usage(run_cmd, opt_parser) }
 
   continue(opt_parser, add_option(cmd, opt))
 }

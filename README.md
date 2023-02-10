@@ -65,6 +65,10 @@ and its documentation can be found at <https://hexdocs.pm/outil>.
 
 ## Changelog
 
+### 0.3.2
+
+* Fixed a bug where the automatic `--help` flag didn't react unless the command had positional arguments.
+
 ### 0.3.1
 
 * Added convenience helpers print_usage and print_usage_and_exit for handling command errors.

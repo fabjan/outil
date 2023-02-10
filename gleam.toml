@@ -1,5 +1,5 @@
 name = "outil"
-version = "0.3.3-rc.1"
+version = "0.3.3"
 description = "A Gleam library for writing command line tools."
 licences = ["Apache-2.0"]
 repository = { type = "github", user = "fabjan", repo = "outil" }

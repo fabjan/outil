@@ -65,6 +65,11 @@ and its documentation can be found at <https://hexdocs.pm/outil>.
 
 ## Changelog
 
+### 0.3.3
+
+* Made `--help` show itself in the output.
+* Made the usage text present the command line error that caused it to be shown.
+
 ### 0.3.2
 
 * Fixed a bug where the automatic `--help` flag didn't react unless the command had positional arguments.

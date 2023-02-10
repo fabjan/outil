@@ -31,7 +31,7 @@ pub fn wrap_usage(cmd: Command, continue: UseArgs(a)) -> CommandResult(a, _) {
     let err_desc = case reason {
       error.MissingArgument(opt) -> "Missing argument for option: " <> opt
       error.MalformedArgument(opt, value) ->
-        "Malformed argument for option: " <> opt <> "(" <> value <> ")"
+        "Malformed argument for option: " <> opt <> " (" <> value <> ")"
       error.OutOfPlaceOption(opt) -> "Out of place option: " <> opt
     }
     CommandLineError(reason, usage(cmd, Some(err_desc)))

@@ -109,6 +109,8 @@ fn help_cmd(args: List(String)) -> CommandResult(String, Nil) {
 }
 
 pub fn help_usage_test() {
+  assert Ok("baz") = help_cmd([])
+
   assert Error(Help(usage)) = help_cmd(["--help"])
 
   usage

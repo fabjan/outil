@@ -94,6 +94,27 @@ fn twoface_cmd(args: List(String)) -> CommandResult(String, String) {
   }
 }
 
+const help_usage = "help -- Test help text.
+
+Usage: help
+
+Options:
+  --foo  bar (string, default: \"baz\")"
+
+fn help_cmd(args: List(String)) -> CommandResult(String, Nil) {
+  use cmd <- command("help", "Test help text.", args)
+  use foo, cmd <- opt.string(cmd, "foo", "bar", "baz")
+
+  foo(cmd)
+}
+
+pub fn help_usage_test() {
+  assert Error(Help(usage)) = help_cmd(["--help"])
+
+  usage
+  |> should.equal(help_usage)
+}
+
 pub fn command_usage_test() {
   let result = hello_cmd([])
 

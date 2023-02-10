@@ -11,14 +11,6 @@ pub fn main() {
   gleeunit.main()
 }
 
-const hello_usage = "hello -- Say hello to someone.
-
-Usage: hello <name>
-
-Options:
-  --enthusiasm  How enthusiastic? (int, default: 1)
-  --loudly  Use all caps. (bool, default: false)"
-
 fn hello_cmd(args: List(String)) -> CommandResult(String, Nil) {
   use cmd <- command("hello", "Say hello to someone.", args)
   use name, cmd <- arg.string(cmd, "name")
@@ -118,41 +110,63 @@ const help_usage = "help -- Test help text.
 Usage: help
 
 Options:
-  --foo  bar (string, default: \"baz\")"
+  --foo  bar (string, default: \"baz\")
+  -h, --help  Show this help text and exit."
 
-fn help_cmd(args: List(String)) -> CommandResult(String, Nil) {
+// verify that the help text works even if there are no positional arguments
+fn help_opt_cmd(args: List(String)) -> CommandResult(String, Nil) {
   use cmd <- command("help", "Test help text.", args)
   use foo, cmd <- opt.string(cmd, "foo", "bar", "baz")
 
   foo(cmd)
 }
 
-pub fn help_usage_test() {
-  assert Ok("baz") = help_cmd([])
+pub fn help_opt_test() {
+  assert Ok("baz") = help_opt_cmd([])
 
-  assert Error(Help(usage)) = help_cmd(["--help"])
+  assert Error(Help(usage)) = help_opt_cmd(["--help"])
 
   usage
   |> should.equal(help_usage)
 }
 
-pub fn command_usage_test() {
+pub fn command_error_usage_test() {
+  let expect_usage =
+    "hello -- ERROR! Missing argument for option: name
+
+Usage: hello <name>
+
+Options:
+  --enthusiasm  How enthusiastic? (int, default: 1)
+  --loudly  Use all caps. (bool, default: false)
+  -h, --help  Show this help text and exit."
+
   let result = hello_cmd([])
 
   assert Error(CommandLineError(_, usage)) = result
 
   usage
-  |> should.equal(hello_usage)
+  |> should.equal(expect_usage)
 }
 
 pub fn help_test() {
+  let expect_usage =
+    "hello -- Say hello to someone.
+
+Usage: hello <name>
+
+Options:
+  --enthusiasm  How enthusiastic? (int, default: 1)
+  --loudly  Use all caps. (bool, default: false)
+  -h, --help  Show this help text and exit."
+
   let argv = ["--help"]
   let result = hello_cmd(argv)
 
   assert Error(Help(usage)) = result
 
   usage
-  |> should.equal(hello_usage)
+  |> should.equal(expect_usage)
 }
 
 pub fn execute_command_test() {

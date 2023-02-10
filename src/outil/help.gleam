@@ -1,7 +1,7 @@
 import gleam/float
 import gleam/int
 import gleam/list
-import gleam/option
+import gleam/option.{None, Option, Some}
 import gleam/result
 import gleam/string
 import outil.{
@@ -22,15 +22,23 @@ pub fn wrap_usage(cmd: Command, continue: UseArgs(a)) -> CommandResult(a, _) {
   let argv_contains = fn(s) { list.contains(cmd.argv, s) }
 
   try args = case argv_contains("--help") || argv_contains("-h") {
-    True -> Error(Help(usage(cmd)))
+    True -> Error(Help(usage(cmd, None)))
     False -> Ok(cmd.argv)
   }
 
   continue(args)
-  |> result.map_error(CommandLineError(_, usage(cmd)))
+  |> result.map_error(fn(reason) {
+    let err_desc = case reason {
+      error.MissingArgument(opt) -> "Missing argument for option: " <> opt
+      error.MalformedArgument(opt, value) ->
+        "Malformed argument for option: " <> opt <> "(" <> value <> ")"
+      error.OutOfPlaceOption(opt) -> "Out of place option: " <> opt
+    }
+    CommandLineError(reason, usage(cmd, Some(err_desc)))
+  })
 }
 
-fn usage(cmd: Command) -> String {
+fn usage(cmd: Command, err_desc: Option(String)) -> String {
   let args =
     cmd.arguments
     |> list.map(fn(arg) { "<" <> arg.name <> ">" })
@@ -48,12 +56,15 @@ fn usage(cmd: Command) -> String {
     |> list.map(fn(opt) { "  " <> opt })
     |> string.join("\n")
 
-  let opts = case opts {
-    "" -> ""
-    _ -> "\n\nOptions:\n" <> opts
-  }
+  let opts =
+    "\n\nOptions:\n" <> opts <> "\n" <> "  -h, --help  Show this help text and exit."
 
-  cmd.name <> " -- " <> cmd.description <> usage <> opts
+  let desc =
+    err_desc
+    |> option.map(fn(desc) { "ERROR! " <> desc })
+    |> option.unwrap(cmd.description)
+
+  cmd.name <> " -- " <> desc <> usage <> opts
 }
 
 fn describe_opt(opt: Opt) {

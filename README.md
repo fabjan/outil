@@ -29,11 +29,8 @@ fn say_hello(args) {
 }
 
 pub fn main() {
-  let args =
-    // Erlang is not required, this example just uses it for getting ARGV
-    erlang.start_arguments()
-    // drop the program name from the arguments we pass in
-    |> list.drop(1)
+  // Erlang is not required, this example just uses it for getting ARGV
+  let args = erlang.start_arguments()
 
   say_hello(args)
   |> result.map_error(print_usage_and_exit)

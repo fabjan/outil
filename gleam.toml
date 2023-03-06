@@ -1,11 +1,11 @@
 name = "outil"
-version = "0.3.3"
+version = "0.4.0"
 description = "A Gleam library for writing command line tools."
 licences = ["Apache-2.0"]
 repository = { type = "github", user = "fabjan", repo = "outil" }
 
 [dependencies]
-gleam_stdlib = "~> 0.26"
+gleam_stdlib = "~> 0.27"
 
 [dev-dependencies]
 gleeunit = "~> 0.10"

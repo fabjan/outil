@@ -1,3 +1,4 @@
+import gleam/result
 import gleam/option.{Some}
 import gleam/string
 import gleeunit
@@ -17,9 +18,9 @@ fn hello_cmd(args: List(String)) -> CommandResult(String, Nil) {
   use enthusiasm, cmd <- opt.int(cmd, "enthusiasm", "How enthusiastic?", 1)
   use loudly, cmd <- opt.bool(cmd, "loudly", "Use all caps.")
 
-  try name = name(cmd)
-  try enthusiasm = enthusiasm(cmd)
-  try loudly = loudly(cmd)
+  use name <- result.then(name(cmd))
+  use enthusiasm <- result.then(enthusiasm(cmd))
+  use loudly <- result.then(loudly(cmd))
 
   let message = "Hello, " <> name <> string.repeat("!", enthusiasm)
 
@@ -63,20 +64,20 @@ fn the_whole_fruit_basket_cmd(
   use plugh, cmd <- opt.int_(cmd, "plugh", Some("p"), "add to grault", 1)
   use xyzzy, cmd <- opt.string_(cmd, "xyzzy", Some("x"), "garply suffix", "!")
 
-  try foo = foo(cmd)
-  try bar = bar(cmd)
-  try baz = baz(cmd)
-  try qux = qux(cmd)
+  use foo <- result.then(foo(cmd))
+  use bar <- result.then(bar(cmd))
+  use baz <- result.then(baz(cmd))
+  use qux <- result.then(qux(cmd))
 
-  try quux = quux(cmd)
-  try corge = corge(cmd)
-  try grault = grault(cmd)
-  try garply = garply(cmd)
+  use quux <- result.then(quux(cmd))
+  use corge <- result.then(corge(cmd))
+  use grault <- result.then(grault(cmd))
+  use garply <- result.then(garply(cmd))
 
-  try waldo = waldo(cmd)
-  try fred = fred(cmd)
-  try plugh = plugh(cmd)
-  try xyzzy = xyzzy(cmd)
+  use waldo <- result.then(waldo(cmd))
+  use fred <- result.then(fred(cmd))
+  use plugh <- result.then(plugh(cmd))
+  use xyzzy <- result.then(xyzzy(cmd))
 
   Ok(FruitBasket(
     foo,
@@ -95,8 +96,8 @@ fn twoface_cmd(args: List(String)) -> CommandResult(String, String) {
   use heads, cmd <- opt.bool(cmd, "heads", "Heads?")
   use tails, cmd <- opt.bool(cmd, "tails", "Tails?")
 
-  try heads = heads(cmd)
-  try tails = tails(cmd)
+  use heads <- result.then(heads(cmd))
+  use tails <- result.then(tails(cmd))
 
   case #(heads, tails) {
     #(True, False) -> Ok("Heads!")
@@ -122,9 +123,9 @@ fn help_opt_cmd(args: List(String)) -> CommandResult(String, Nil) {
 }
 
 pub fn help_opt_test() {
-  assert Ok("baz") = help_opt_cmd([])
+  let assert Ok("baz") = help_opt_cmd([])
 
-  assert Error(Help(usage)) = help_opt_cmd(["--help"])
+  let assert Error(Help(usage)) = help_opt_cmd(["--help"])
 
   usage
   |> should.equal(help_usage)
@@ -143,7 +144,7 @@ Options:
 
   let result = hello_cmd([])
 
-  assert Error(CommandLineError(_, usage)) = result
+  let assert Error(CommandLineError(_, usage)) = result
 
   usage
   |> should.equal(expect_usage)
@@ -163,7 +164,7 @@ Options:
   let argv = ["--help"]
   let result = hello_cmd(argv)
 
-  assert Error(Help(usage)) = result
+  let assert Error(Help(usage)) = result
 
   usage
   |> should.equal(expect_usage)
@@ -197,7 +198,7 @@ pub fn missing_argument_test() {
   let argv = []
   let result = hello_cmd(argv)
 
-  assert Error(CommandLineError(reason, _)) = result
+  let assert Error(CommandLineError(reason, _)) = result
 
   reason
   |> should.equal(MissingArgument("name"))
@@ -207,7 +208,7 @@ pub fn malformed_argument_test() {
   let argv = ["world", "--enthusiasm=three"]
   let result = hello_cmd(argv)
 
-  assert Error(CommandLineError(reason, _)) = result
+  let assert Error(CommandLineError(reason, _)) = result
 
   reason
   |> should.equal(MalformedArgument("enthusiasm", "three"))

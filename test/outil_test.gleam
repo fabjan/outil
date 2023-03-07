@@ -105,14 +105,6 @@ fn twoface_cmd(args: List(String)) -> CommandResult(String, String) {
   }
 }
 
-const expect_help_usage = "help -- Test help text.
-
-Usage: help
-
-Options:
-  --foo  bar (string, default: \"baz\")
-  -h, --help  Show this help text and exit."
-
 // verify that the help text works even if there are no positional arguments
 fn help_opt_cmd(args: List(String)) -> CommandResult(String, Nil) {
   use cmd <- command("help", "Test help text.", args)
@@ -124,6 +116,15 @@ fn help_opt_cmd(args: List(String)) -> CommandResult(String, Nil) {
 }
 
 pub fn help_opt_test() {
+  let expect_help_usage =
+    "help -- Test help text.
+
+Usage: help
+
+Options:
+  --foo  bar (string, default: \"baz\")
+  -h, --help  Show this help text and exit."
+
   help_opt_cmd([])
   |> should.equal(Ok("baz"))
 
@@ -142,9 +143,7 @@ Options:
   --loudly  Use all caps. (bool, default: false)
   -h, --help  Show this help text and exit."
 
-  let result = hello_cmd([])
-
-  let assert Error(CommandLineError(_, usage)) = result
+  let assert Error(CommandLineError(_, usage)) = hello_cmd([])
 
   usage
   |> should.equal(expect_usage)
@@ -161,13 +160,8 @@ Options:
   --loudly  Use all caps. (bool, default: false)
   -h, --help  Show this help text and exit."
 
-  let argv = ["--help"]
-  let result = hello_cmd(argv)
-
-  let assert Error(Help(usage)) = result
-
-  usage
-  |> should.equal(expect_usage)
+  hello_cmd(["--help"])
+  |> should.equal(Error(Help(expect_usage)))
 }
 
 pub fn execute_command_test() {
@@ -195,10 +189,7 @@ pub fn int_opt_test() {
 }
 
 pub fn missing_argument_test() {
-  let argv = []
-  let result = hello_cmd(argv)
-
-  let assert Error(CommandLineError(reason, _)) = result
+  let assert Error(CommandLineError(reason, _)) = hello_cmd([])
 
   reason
   |> should.equal(MissingArgument("name"))

@@ -20,8 +20,8 @@ fn say_hello(args) {
   use name, cmd <- arg.string(cmd, "name")
   use enthusiasm, cmd <- opt.int(cmd, "enthusiasm", "How enthusiastic?", 1)
 
-  try name = name(cmd)
-  try enthusiasm = enthusiasm(cmd)
+  use name <- name(cmd)
+  use enthusiasm <- enthusiasm(cmd)
 
   let message = "Hello, " <> name <> string.repeat("!", enthusiasm)
 
@@ -64,6 +64,11 @@ gleam add outil
 and its documentation can be found at <https://hexdocs.pm/outil>.
 
 ## Changelog
+
+### 0.4.0
+
+* Adapted to Gleam 0.27, so no more try syntax.
+* BREAKING -- API change to let library users use use without result.then wrapping.
 
 ### 0.3.3
 

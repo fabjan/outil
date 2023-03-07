@@ -14,12 +14,12 @@ pub fn main() {
 fn hello_cmd(args: List(String)) -> CommandResult(String, Nil) {
   use cmd <- command("hello", "Say hello to someone.", args)
   use name, cmd <- arg.string(cmd, "name")
+
   use enthusiasm, cmd <- opt.int(cmd, "enthusiasm", "How enthusiastic?", 1)
   use loudly, cmd <- opt.bool(cmd, "loudly", "Use all caps.")
-
-  try name = name(cmd)
-  try enthusiasm = enthusiasm(cmd)
-  try loudly = loudly(cmd)
+  use name <- name(cmd)
+  use enthusiasm <- enthusiasm(cmd)
+  use loudly <- loudly(cmd)
 
   let message = "Hello, " <> name <> string.repeat("!", enthusiasm)
 
@@ -63,20 +63,20 @@ fn the_whole_fruit_basket_cmd(
   use plugh, cmd <- opt.int_(cmd, "plugh", Some("p"), "add to grault", 1)
   use xyzzy, cmd <- opt.string_(cmd, "xyzzy", Some("x"), "garply suffix", "!")
 
-  try foo = foo(cmd)
-  try bar = bar(cmd)
-  try baz = baz(cmd)
-  try qux = qux(cmd)
+  use foo <- foo(cmd)
+  use bar <- bar(cmd)
+  use baz <- baz(cmd)
+  use qux <- qux(cmd)
 
-  try quux = quux(cmd)
-  try corge = corge(cmd)
-  try grault = grault(cmd)
-  try garply = garply(cmd)
+  use quux <- quux(cmd)
+  use corge <- corge(cmd)
+  use grault <- grault(cmd)
+  use garply <- garply(cmd)
 
-  try waldo = waldo(cmd)
-  try fred = fred(cmd)
-  try plugh = plugh(cmd)
-  try xyzzy = xyzzy(cmd)
+  use waldo <- waldo(cmd)
+  use fred <- fred(cmd)
+  use plugh <- plugh(cmd)
+  use xyzzy <- xyzzy(cmd)
 
   Ok(FruitBasket(
     foo,
@@ -95,8 +95,8 @@ fn twoface_cmd(args: List(String)) -> CommandResult(String, String) {
   use heads, cmd <- opt.bool(cmd, "heads", "Heads?")
   use tails, cmd <- opt.bool(cmd, "tails", "Tails?")
 
-  try heads = heads(cmd)
-  try tails = tails(cmd)
+  use heads <- heads(cmd)
+  use tails <- tails(cmd)
 
   case #(heads, tails) {
     #(True, False) -> Ok("Heads!")
@@ -105,7 +105,19 @@ fn twoface_cmd(args: List(String)) -> CommandResult(String, String) {
   }
 }
 
-const help_usage = "help -- Test help text.
+// verify that the help text works even if there are no positional arguments
+fn help_opt_cmd(args: List(String)) -> CommandResult(String, Nil) {
+  use cmd <- command("help", "Test help text.", args)
+  use foo, cmd <- opt.string(cmd, "foo", "bar", "baz")
+
+  use x <- foo(cmd)
+
+  Ok(x)
+}
+
+pub fn help_opt_test() {
+  let expect_help_usage =
+    "help -- Test help text.
 
 Usage: help
 
@@ -113,21 +125,11 @@ Options:
   --foo  bar (string, default: \"baz\")
   -h, --help  Show this help text and exit."
 
-// verify that the help text works even if there are no positional arguments
-fn help_opt_cmd(args: List(String)) -> CommandResult(String, Nil) {
-  use cmd <- command("help", "Test help text.", args)
-  use foo, cmd <- opt.string(cmd, "foo", "bar", "baz")
+  help_opt_cmd([])
+  |> should.equal(Ok("baz"))
 
-  foo(cmd)
-}
-
-pub fn help_opt_test() {
-  assert Ok("baz") = help_opt_cmd([])
-
-  assert Error(Help(usage)) = help_opt_cmd(["--help"])
-
-  usage
-  |> should.equal(help_usage)
+  help_opt_cmd(["--help"])
+  |> should.equal(Error(Help(expect_help_usage)))
 }
 
 pub fn command_error_usage_test() {
@@ -141,9 +143,7 @@ Options:
   --loudly  Use all caps. (bool, default: false)
   -h, --help  Show this help text and exit."
 
-  let result = hello_cmd([])
-
-  assert Error(CommandLineError(_, usage)) = result
+  let assert Error(CommandLineError(_, usage)) = hello_cmd([])
 
   usage
   |> should.equal(expect_usage)
@@ -160,13 +160,8 @@ Options:
   --loudly  Use all caps. (bool, default: false)
   -h, --help  Show this help text and exit."
 
-  let argv = ["--help"]
-  let result = hello_cmd(argv)
-
-  assert Error(Help(usage)) = result
-
-  usage
-  |> should.equal(expect_usage)
+  hello_cmd(["--help"])
+  |> should.equal(Error(Help(expect_usage)))
 }
 
 pub fn execute_command_test() {
@@ -194,10 +189,7 @@ pub fn int_opt_test() {
 }
 
 pub fn missing_argument_test() {
-  let argv = []
-  let result = hello_cmd(argv)
-
-  assert Error(CommandLineError(reason, _)) = result
+  let assert Error(CommandLineError(reason, _)) = hello_cmd([])
 
   reason
   |> should.equal(MissingArgument("name"))
@@ -207,7 +199,7 @@ pub fn malformed_argument_test() {
   let argv = ["world", "--enthusiasm=three"]
   let result = hello_cmd(argv)
 
-  assert Error(CommandLineError(reason, _)) = result
+  let assert Error(CommandLineError(reason, _)) = result
 
   reason
   |> should.equal(MalformedArgument("enthusiasm", "three"))

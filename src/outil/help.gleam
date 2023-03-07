@@ -21,10 +21,10 @@ pub type UseArgs(a) =
 pub fn wrap_usage(cmd: Command, continue: UseArgs(a)) -> CommandResult(a, _) {
   let argv_contains = fn(s) { list.contains(cmd.argv, s) }
 
-  try args = case argv_contains("--help") || argv_contains("-h") {
+  use args <- result.then(case argv_contains("--help") || argv_contains("-h") {
     True -> Error(Help(usage(cmd, None)))
     False -> Ok(cmd.argv)
-  }
+  })
 
   continue(args)
   |> result.map_error(fn(reason) {

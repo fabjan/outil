@@ -1,4 +1,3 @@
-import gleam/result
 import gleam/option.{Some}
 import gleam/string
 import gleeunit
@@ -15,12 +14,12 @@ pub fn main() {
 fn hello_cmd(args: List(String)) -> CommandResult(String, Nil) {
   use cmd <- command("hello", "Say hello to someone.", args)
   use name, cmd <- arg.string(cmd, "name")
+
   use enthusiasm, cmd <- opt.int(cmd, "enthusiasm", "How enthusiastic?", 1)
   use loudly, cmd <- opt.bool(cmd, "loudly", "Use all caps.")
-
-  use name <- result.then(name(cmd))
-  use enthusiasm <- result.then(enthusiasm(cmd))
-  use loudly <- result.then(loudly(cmd))
+  use name <- name(cmd)
+  use enthusiasm <- enthusiasm(cmd)
+  use loudly <- loudly(cmd)
 
   let message = "Hello, " <> name <> string.repeat("!", enthusiasm)
 
@@ -64,20 +63,20 @@ fn the_whole_fruit_basket_cmd(
   use plugh, cmd <- opt.int_(cmd, "plugh", Some("p"), "add to grault", 1)
   use xyzzy, cmd <- opt.string_(cmd, "xyzzy", Some("x"), "garply suffix", "!")
 
-  use foo <- result.then(foo(cmd))
-  use bar <- result.then(bar(cmd))
-  use baz <- result.then(baz(cmd))
-  use qux <- result.then(qux(cmd))
+  use foo <- foo(cmd)
+  use bar <- bar(cmd)
+  use baz <- baz(cmd)
+  use qux <- qux(cmd)
 
-  use quux <- result.then(quux(cmd))
-  use corge <- result.then(corge(cmd))
-  use grault <- result.then(grault(cmd))
-  use garply <- result.then(garply(cmd))
+  use quux <- quux(cmd)
+  use corge <- corge(cmd)
+  use grault <- grault(cmd)
+  use garply <- garply(cmd)
 
-  use waldo <- result.then(waldo(cmd))
-  use fred <- result.then(fred(cmd))
-  use plugh <- result.then(plugh(cmd))
-  use xyzzy <- result.then(xyzzy(cmd))
+  use waldo <- waldo(cmd)
+  use fred <- fred(cmd)
+  use plugh <- plugh(cmd)
+  use xyzzy <- xyzzy(cmd)
 
   Ok(FruitBasket(
     foo,
@@ -96,8 +95,8 @@ fn twoface_cmd(args: List(String)) -> CommandResult(String, String) {
   use heads, cmd <- opt.bool(cmd, "heads", "Heads?")
   use tails, cmd <- opt.bool(cmd, "tails", "Tails?")
 
-  use heads <- result.then(heads(cmd))
-  use tails <- result.then(tails(cmd))
+  use heads <- heads(cmd)
+  use tails <- tails(cmd)
 
   case #(heads, tails) {
     #(True, False) -> Ok("Heads!")
@@ -106,7 +105,7 @@ fn twoface_cmd(args: List(String)) -> CommandResult(String, String) {
   }
 }
 
-const help_usage = "help -- Test help text.
+const expect_help_usage = "help -- Test help text.
 
 Usage: help
 
@@ -119,16 +118,17 @@ fn help_opt_cmd(args: List(String)) -> CommandResult(String, Nil) {
   use cmd <- command("help", "Test help text.", args)
   use foo, cmd <- opt.string(cmd, "foo", "bar", "baz")
 
-  foo(cmd)
+  use x <- foo(cmd)
+
+  Ok(x)
 }
 
 pub fn help_opt_test() {
-  let assert Ok("baz") = help_opt_cmd([])
+  help_opt_cmd([])
+  |> should.equal(Ok("baz"))
 
-  let assert Error(Help(usage)) = help_opt_cmd(["--help"])
-
-  usage
-  |> should.equal(help_usage)
+  help_opt_cmd(["--help"])
+  |> should.equal(Error(Help(expect_help_usage)))
 }
 
 pub fn command_error_usage_test() {

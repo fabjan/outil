@@ -90,14 +90,6 @@ pub type CommandReturn(a) {
 pub type CommandResult(a, b) =
   Result(a, CommandReturn(b))
 
-/// The type of functions that execute a command.
-pub type RunCommand(a, b) =
-  fn(Command) -> CommandResult(a, b)
-
-/// The type of continuation functions in building a command.
-pub type Configure(a, b, c) =
-  fn(RunCommand(a, c), Command) -> b
-
 /// Parse a Bool from a string.
 pub fn parse_bool(arg: String) -> Result(Bool, Nil) {
   case arg {

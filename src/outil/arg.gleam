@@ -3,7 +3,7 @@ import gleam/int
 import gleam/list
 import gleam/result
 import outil.{
-  Argument, BoolArgument, Command, Configure, FloatArgument, IntArgument,
+  Argument, BoolArgument, Command, CommandReturn, FloatArgument, IntArgument,
   StringArgument, parse_bool,
 }
 import outil/error.{MalformedArgument,
@@ -11,23 +11,23 @@ import outil/error.{MalformedArgument,
 import outil/help
 
 /// Add a positional bool argument to the command before continuing.
-pub fn bool(cmd: Command, name: String, continue: Configure(Bool, a, _)) -> a {
+pub fn bool(cmd: Command, name: String, continue) {
   with_positional_argument(cmd, BoolArgument(name), parse_bool, continue)
 }
 
 /// Add a positional float argument to the command before continuing.
-pub fn float(cmd: Command, name: String, continue: Configure(Float, a, _)) -> a {
+pub fn float(cmd: Command, name: String, continue) {
   with_positional_argument(cmd, FloatArgument(name), float.parse, continue)
 }
 
 /// Add a positional int argument to the command before continuing.
-pub fn int(cmd: Command, name: String, continue: Configure(Int, a, _)) -> a {
+pub fn int(cmd: Command, name: String, continue) {
   with_positional_argument(cmd, IntArgument(name), int.parse, continue)
 }
 
 /// Add a positional string argument to the command before continuing.
-pub fn string(cmd: Command, name: String, cont: Configure(String, a, _)) -> a {
-  with_positional_argument(cmd, StringArgument(name), Ok, cont)
+pub fn string(cmd: Command, name: String, continue) {
+  with_positional_argument(cmd, StringArgument(name), Ok, continue)
 }
 
 /// Add a positional argument to the command.
@@ -37,12 +37,18 @@ pub fn string(cmd: Command, name: String, cont: Configure(String, a, _)) -> a {
 fn with_positional_argument(
   cmd: Command,
   argument: Argument,
-  parse: fn(String) -> Result(b, Nil),
-  continue: Configure(b, a, _),
-) -> a {
+  parse: fn(String) -> Result(a, Nil),
+  continue,
+) {
   let arg_pos = list.length(cmd.arguments)
   let arg_parser = positional_arg_parser(arg_pos, argument.name, parse)
-  let arg_parser = fn(run_cmd: Command) { help.wrap_usage(run_cmd, arg_parser) }
+  let arg_parser = fn(
+    run_cmd: Command,
+    and_then: fn(a) -> Result(b, CommandReturn(c)),
+  ) {
+    help.wrap_usage(run_cmd, arg_parser)
+    |> result.then(and_then)
+  }
 
   continue(arg_parser, append_argument(cmd, argument))
 }

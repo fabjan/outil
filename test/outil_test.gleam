@@ -2,7 +2,7 @@ import gleam/option.{Some}
 import gleam/string
 import gleeunit
 import gleeunit/should
-import outil.{CommandError, CommandLineError, CommandResult, Help, command}
+import outil.{type CommandResult, CommandError, CommandLineError, Help, command}
 import outil/error.{MalformedArgument, MissingArgument}
 import outil/arg
 import outil/opt

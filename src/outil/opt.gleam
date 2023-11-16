@@ -1,11 +1,14 @@
 import gleam/float
 import gleam/int
 import gleam/list
-import gleam/option.{None, Option, Some}
+import gleam/option.{type Option, None, Some}
 import gleam/result
 import gleam/string
-import outil.{BoolOpt, Command, FloatOpt, IntOpt, Opt, StringOpt, parse_bool}
-import outil/error.{MalformedArgument, MissingArgument, Reason}
+import outil.{
+  type Command, type Opt, BoolOpt, Command, FloatOpt, IntOpt, Opt, StringOpt,
+  parse_bool,
+}
+import outil/error.{type Reason, MalformedArgument, MissingArgument}
 import outil/help
 
 /// Add a named bool option to the command before continuing.

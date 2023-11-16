@@ -15,3 +15,5 @@ jobs:
           version-type: strict
           version-file: ".tool-versions"
       - run: ./publish.sh
+        env:
+          HEXPM_USER: ${{ secrets.HEXPM_USER }}

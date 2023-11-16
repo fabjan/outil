@@ -1,14 +1,12 @@
-name: test
+name: Publish to hex.pm
 
 on:
   push:
-    branches:
-      - master
-      - main
-  pull_request:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
-  test:
+  push-hex:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3.2.0
@@ -16,6 +14,4 @@ jobs:
         with:
           version-type: strict
           version-file: ".tool-versions"
-      - run: gleam format --check src test
-      - run: gleam deps download
-      - run: gleam test
+      - run: ./publish.sh

@@ -99,12 +99,6 @@ pub fn parse_bool(arg: String) -> Result(Bool, Nil) {
   }
 }
 
-if erlang {
-  external fn halt_program(Int) -> Nil =
-    "erlang" "halt"
-}
-
-if javascript {
-  external fn halt_program(Int) -> Nil =
-    "./outil_ffi.mjs" "exit"
-}
+@external(erlang, "erlang", "halt")
+@external(javascript, "./outil_ffi.mjs", "exit")
+fn halt_program(code: Int) -> Nil

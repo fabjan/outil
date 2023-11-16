@@ -65,6 +65,10 @@ and its documentation can be found at <https://hexdocs.pm/outil>.
 
 ## Changelog
 
+### 0.5.0
+
+* Adapted for Gleam 0.32.
+
 ### 0.4.0
 
 * Adapted to Gleam 0.27, so no more try syntax.

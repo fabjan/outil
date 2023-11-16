@@ -14,4 +14,4 @@ if [ "$tag_version" != "$package_version" ]; then
   exit 1
 fi
 
-gleam publish
+gleam publish --yes

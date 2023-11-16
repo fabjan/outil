@@ -1,6 +1,6 @@
 import gleam/io
-import gleam/option.{Option}
-import outil/error.{Reason}
+import gleam/option.{type Option}
+import outil/error.{type Reason}
 
 /// Create a command with the given name and description, and pass it to the
 /// given continuation function for further configuration.

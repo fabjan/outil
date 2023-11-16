@@ -3,11 +3,12 @@ import gleam/int
 import gleam/list
 import gleam/result
 import outil.{
-  Argument, BoolArgument, Command, CommandReturn, FloatArgument, IntArgument,
-  StringArgument, parse_bool,
+  type Argument, type Command, type CommandReturn, BoolArgument, Command,
+  FloatArgument, IntArgument, StringArgument, parse_bool,
 }
-import outil/error.{MalformedArgument,
-  MissingArgument, OutOfPlaceOption, Reason}
+import outil/error.{
+  type Reason, MalformedArgument, MissingArgument, OutOfPlaceOption,
+}
 import outil/help
 
 /// Add a positional bool argument to the command before continuing.

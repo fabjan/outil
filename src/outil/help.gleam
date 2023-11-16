@@ -1,14 +1,14 @@
 import gleam/float
 import gleam/int
 import gleam/list
-import gleam/option.{None, Option, Some}
+import gleam/option.{type Option, None, Some}
 import gleam/result
 import gleam/string
 import outil.{
-  BoolOpt, Command, CommandLineError, CommandResult, FloatOpt, Help, IntOpt, Opt,
-  OptValue, StringOpt,
+  type Command, type CommandResult, type Opt, type OptValue, BoolOpt,
+  CommandLineError, FloatOpt, Help, IntOpt, Opt, StringOpt,
 }
-import outil/error.{Reason}
+import outil/error.{type Reason}
 
 /// A function using the command line arguments which can return command error reasons.
 pub type UseArgs(a) =

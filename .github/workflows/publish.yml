@@ -17,3 +17,4 @@ jobs:
       - run: ./publish.sh
         env:
           HEXPM_USER: ${{ secrets.HEXPM_USER }}
+          HEXPM_PASS: ${{ secrets.HEXPM_PASS }}
